@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Resume Analyzer - Developed by Juktamukhi Dey</title>
+    
+    <!-- Marked.js for formatting Markdown -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+    <!-- Font Awesome for Contact Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #eef2f5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        /* ---------------------------------------------------- */
+        /* FULL ORIGINAL SIZE: Main Resume Analyzer Card       */
+        /* ---------------------------------------------------- */
+        .card {
+            background: #ffffff;
+            width: 100%;
+            max-width: 620px;
+            padding: 35px 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .card h1 {
+            font-size: 24px;
+            color: #1a1a1a;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .subtitle {
+            font-size: 13px;
+            color: #6b7280;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .description {
+            font-size: 13px;
+            color: #888888;
+            margin-bottom: 25px;
+        }
+
+        /* Dashed Drag & Drop Box */
+        .drop-zone {
+            border: 2px dashed #b0c4de;
+            border-radius: 8px;
+            padding: 35px 20px;
+            background-color: #fafbfc;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .drop-zone:hover {
+            border-color: #3b82f6;
+            background-color: #f0f7ff;
+        }
+
+        .file-label {
+            color: #3b82f6;
+            font-weight: 600;
+            text-decoration: underline;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .file-name {
+            margin-top: 10px;
+            font-size: 13px;
+            color: #4b5563;
+            word-break: break-all;
+        }
+
+        /* Analyze Button */
+        .btn-analyze {
+            background-color: #3b82f6;
+            color: #ffffff;
+            border: none;
+            padding: 11px 24px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            width: 100%;
+            max-width: 180px;
+        }
+
+        .btn-analyze:hover {
+            background-color: #2563eb;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        /* Output Box */
+        #output {
+            margin-top: 20px;
+            text-align: left;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #374151;
+            display: none;
+        }
+
+        .status-box {
+            margin-top: 20px;
+            padding: 12px;
+            background-color: #3b4252;
+            color: #ffffff;
+            font-size: 13px;
+            border-radius: 6px;
+            text-align: center;
+            display: none;
+        }
+
+        /* ---------------------------------------------------- */
+        /* ULTRA-MINI CONTACT SECTION ONLY                     */
+        /* ---------------------------------------------------- */
+        .contact-card {
+            background: #ffffff;
+            width: 100%;
+            max-width: 420px; /* Even smaller width */
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* Left Side */
+        .contact-info {
+            flex: 1;
+            padding: 8px 10px; /* Very tight padding */
+            background-color: #f8fafc;
+        }
+
+        .contact-info h2 {
+            font-size: 11px;
+            color: #1e293b;
+            font-weight: 700;
+            margin-bottom: 2px;
+        }
+
+        .contact-info p {
+            font-size: 9px;
+            color: #64748b;
+            line-height: 1.2;
+            margin-bottom: 6px;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 3px;
+            font-size: 9.5px;
+            color: #334155;
+        }
+
+        .info-item i {
+            font-size: 9.5px;
+            color: #3b82f6;
+            width: 14px;
+        }
+
+        /* Right Side */
+        .contact-form-container {
+            flex: 1;
+            background-color: #3b82f6;
+            padding: 8px 10px; /* Very tight padding */
+            color: #ffffff;
+        }
+
+        .contact-form-container h2 {
+            font-size: 11px;
+            font-weight: 700;
+            margin-bottom: 5px;
+            color: #ffffff;
+        }
+
+        .contact-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 10px;
+            padding: 3px 8px;
+            font-size: 9.5px;
+            color: #ffffff;
+            margin-bottom: 4px;
+            outline: none;
+            height: 22px;
+        }
+
+        .contact-input::placeholder {
+            color: rgba(255, 255, 255, 0.85);
+        }
+
+        .btn-submit-contact {
+            background: #ffffff;
+            color: #3b82f6;
+            border: none;
+            padding: 3px 8px;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 9.5px;
+            margin-top: 1px;
+            transition: background 0.2s ease;
+        }
+
+        .btn-submit-contact:hover {
+            background: #e2e8f0;
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 15px;
+            font-size: 11px;
+            color: #9ca3af;
+            text-align: center;
+        }
+
+        .footer b {
+            color: #6b7280;
+            font-weight: 600;
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 450px) {
+            .contact-card {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Main Analyzer Card (Full Original Size) -->
+    <div class="card">
+        <h1>AI-Powered Resume Analyzer</h1>
+        <div class="subtitle">Developed by Juktamukhi Dey</div>
+        <p class="description">Upload resume to analyze skills, job fit, and recommendations.</p>
+
+        <form id="uploadForm">
+            <div class="drop-zone" onclick="document.getElementById('fileInput').click();">
+                <span class="file-label">Choose Document Resume</span>
+                <input type="file" id="fileInput" accept=".pdf,.docx,.txt" required>
+                <div id="fileNameDisplay" class="file-name"></div>
+            </div>
+
+            <button type="submit" class="btn-analyze">Analyze Resume</button>
+        </form>
+
+        <div id="statusBox" class="status-box"></div>
+        <div id="output"></div>
+    </div>
+
+    <!-- Ultra-Mini Contact Us Section -->
+    <div class="contact-card">
+        <!-- Left Side -->
+        <div class="contact-info">
+            <h2>Let's Get In Touch</h2>
+            <p>Have Questions Or Need Help? We're Here To Help! Contact Us For Inquiries, Support, Or Feedback.</p>
+            
+            <div class="info-item">
+                <i class="fa-solid fa-location-dot"></i>
+                <span>Kolkata, West Bengal</span>
+            </div>
+            <div class="info-item">
+                <i class="fa-solid fa-envelope"></i>
+                <span>juktamukhidey@gmail.com</span>
+            </div>
+            <div class="info-item">
+                <i class="fa-solid fa-phone"></i>
+                <span>7596979843</span>
+            </div>
+        </div>
+
+        <!-- Right Side -->
+        <div class="contact-form-container">
+            <h2>Contact Us</h2>
+            <form id="contactForm">
+                <input type="text" class="contact-input" placeholder="Username" required>
+                <input type="email" class="contact-input" placeholder="Email" required>
+                <input type="tel" class="contact-input" placeholder="Phone Number" required>
+                <button type="submit" class="btn-submit-contact">Send</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        Created by <b>Juktamukhi Dey</b> | All Rights Reserved
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const fileNameDisplay = document.getElementById('fileNameDisplay');
+        const statusBox = document.getElementById('statusBox');
+        const outputDiv = document.getElementById('output');
+
+        fileInput.addEventListener('change', function() {
+            if (this.files.length > 0) {
+                fileNameDisplay.innerText = this.files[0].name;
+            }
+        });
+
+        document.getElementById('uploadForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            if (!fileInput.files.length) return;
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            statusBox.style.display = "block";
+            statusBox.style.backgroundColor = "#3b4252";
+            statusBox.innerText = "Analyzing resume, please wait...";
+            outputDiv.style.display = "none";
+
+            try {
+                const response = await fetch('/api/resume/analyze', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const rawResponseText = await response.text();
+
+                try {
+                    const data = JSON.parse(rawResponseText);
+                    if (data.candidates && data.candidates[0].content.parts[0].text) {
+                        let rawMarkdown = data.candidates[0].content.parts[0].text;
+                        outputDiv.innerHTML = marked.parse(rawMarkdown);
+                        outputDiv.style.display = "block";
+                        statusBox.style.display = "none";
+                    } else {
+                        statusBox.innerText = "Unexpected response from AI model.";
+                    }
+                } catch (jsonErr) {
+                    statusBox.style.backgroundColor = "#991b1b";
+                    statusBox.innerText = rawResponseText;
+                }
+
+            } catch (err) {
+                statusBox.style.backgroundColor = "#991b1b";
+                statusBox.innerText = "Error running analysis: " + err.message;
+            }
+        });
+
+        // Contact Form Handler
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert("Thank you! Your contact details have been submitted successfully.");
+            this.reset();
+        });
+    </script>
+
+</body>
+</html>
